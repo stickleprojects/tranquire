@@ -4,10 +4,15 @@ branches:
   - master
 image: Visual Studio 2017
 configuration: Release
+environment:
+  sonarqube-token:
+    secure: +bTyY1Z6fmq32MMiKCXXmbMo1fTlP2AwbbOs7FaFKJJ13wcyTVP121vKX3OJITIt
 before_build:
 - |- # Restore TWICE. See https://github.com/AArnott/Nerdbank.GitVersioning/issues/113#issuecomment-285903085
   msbuild src\Tranquire.sln /nologo /m /v:quiet /t:restore > nul
   msbuild src\Tranquire.sln /nologo /m /v:quiet /t:restore
+- choco install "msbuild-sonarqube-runner" -y
+- msbuild.sonarqube.runner.exe begin /d:"sonar.login=%sonarqube-token% /o:"galad-github" /k:"Tranquire" /d:sonar.host.url="https://sonarcloud.io" /d:"sonar.exclusions=src/**/obj/**"
 build_script:
 - msbuild src\Tranquire.sln /nologo /m /v:minimal /t:build,pack
 test:
